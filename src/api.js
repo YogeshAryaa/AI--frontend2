@@ -1,9 +1,11 @@
 // When the backend serves this UI (production), talk to the same address by default.
 // In development (npm run dev, any port) the backend is always separate, on :8000.
+// On cloud deployments (e.g. Vercel), use VITE_BACKEND_URL.
 const defaultBase = () =>
-  !import.meta.env.DEV && typeof window !== "undefined" && window.location.protocol.startsWith("http")
+  import.meta.env.VITE_BACKEND_URL ||
+  (!import.meta.env.DEV && typeof window !== "undefined" && window.location.protocol.startsWith("http")
     ? window.location.origin
-    : "http://localhost:8000";
+    : "http://localhost:8000");
 
 // "localhost:8000", " http://localhost:8000/ ", "http//localhost:8000", "http://localhost:8000/health"
 // all become "http://localhost:8000". A wrong address would otherwise hit this app's own page.
@@ -37,8 +39,8 @@ async function call(base, path, init) {
 }
 
 export const conn = () => ({
-  base: cleanBase(localStorage.getItem("rag_base")),
-  token: localStorage.getItem("rag_token") || "",
+  base: cleanBase(localStorage.getItem("rag_base") || import.meta.env.VITE_BACKEND_URL || ""),
+  token: localStorage.getItem("rag_token") || import.meta.env.VITE_ADMIN_TOKEN || "",
 });
 
 export function saveConn(base, token) {
